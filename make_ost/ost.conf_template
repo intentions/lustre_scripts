@@ -11,7 +11,7 @@ OST_INDEX=""
 VDEV_LIST=""
 
 #REFORMAT: uncomment if you want to reformat the file system
-#REFORMAT="--reformat"
+#SET_REFORMAT="--reformat"
 
 #MGS node: the ip for the mgs system, with interface as configured in /etc/modprobe.d/lnet.conf
 MGS_NODE=""
@@ -19,8 +19,18 @@ MGS_NODE=""
 #Failover mgs node: the failover mgs node ip
 FAILOVER_NODE=""
 
+#backend file system
+#BACKEND_FILESYSTEM="zfs"
+
 #RAID_LEVEL
 RAID_LEVEL="raidz2"
 
+#Lustre configuration used by /etc/init.d/lustre
+#LUSTRE_CONFIG="/etc/sysconfig/lustre"
+
 #log name: the name of the logfile generated from the ost creation
-LOG_NAME=""
+#LOG_NAME="/tmp/ost_buidl" #-DDMONYY.log
+
+#ldev configuration file: the ldev.conf file used by /etc/init.d/lustre when mounting the ost
+#note that the system will overwrite any exising file at the below location
+#LDEV_CONF="/tmp/new.ldev.conf"
