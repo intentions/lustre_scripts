@@ -1,0 +1,26 @@
+#this is the configuration template used by make_ost.sh
+#note that this script assumes that you are using zfs as the back end file system
+
+#File system name: the name of the lustre file system the ost is to be part of
+FILESYSTEM_NAME=""
+
+#Index: This is the decimal value index for the ost, it should be the next number after the current ost
+OST_INDEX=""
+
+#VDEV list: list of disks to be used in creating the zpool
+VDEV_LIST=""
+
+#REFORMAT: uncomment if you want to reformat the file system
+#REFORMAT="--reformat"
+
+#MGS node: the ip for the mgs system, with interface as configured in /etc/modprobe.d/lnet.conf
+MGS_NODE=""
+
+#Failover mgs node: the failover mgs node ip
+FAILOVER_NODE=""
+
+#RAID_LEVEL
+RAID_LEVEL="raidz2"
+
+#log name: the name of the logfile generated from the ost creation
+LOG_NAME=""
