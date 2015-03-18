@@ -1,0 +1,5 @@
+Lustre bash scripts
+
+mds backup script:  script to run via cron to provide lustre backups, uses lvm snapshots
+
+make_ost: creates an ost on an oss
