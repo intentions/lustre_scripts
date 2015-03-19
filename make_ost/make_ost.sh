@@ -20,19 +20,34 @@ HELP="
 
  note that due to pathing issues the service command cannot be used to start lustre.
 
- use syntax:
+ use syntax: $0 -c/--conf configfile
 "
 
-if [[ $1 == "-h" || $1 =="--help" ]]; then
+#user check
+if [[ `whoami` -ne "root" ]]
+then
+	echo "this must be run as root"
+	exit
+fi
+
+if [[ $1 == "-h" || $1 =="--help" || ! $1 ]]; then
 	echo $HELP
+	exit
+fi
+
+if [[ $1 == "-c" || $1 = "--conf" ]]; then
+	CONFIGFILE=$2
+else
+	echo "no config file passed, please pass a config file"
+	exit
 fi
 
 #sourcing config file
-[ -f ost.conf ] && . ost.conf
+[ -f $CONFIGFILE ] && . $CONFIGFILE
 
 #setting up log file
 TIMESTAMP=`date +%d%^b%y`
-LOGNAME=${LOG_NAME:-"/tmp/ost_build"}-$TIMESTAMP".log"
+LOGFILE=${LOG_NAME:-"/tmp/ost_build"}-$TIMESTAMP".log"
 
 #variable list
 
@@ -79,14 +94,14 @@ LDEVCONF=${LDEV_CONF:-"/tmp/new.ldev.conf"}
 #lustre configuration file
 LUSTRECONF=${LUSTRE_CONFIG:-"/etc/sysconfig/lustre"}
 
-#logfile initialization
-cat > LOGNAME <<EOF
+CONFIGREPORT="
 ost creation log
 DATE: $TIMESTAMP
 Filesystem name used: $FSNAME
 Reformat flag: $REFORMAT
 Backend file system: $BACKENDFS
 Index provided: $INDEX
+OST lable: $FSNAME-OST00$HEXINDEX
 MGS node: $MGSNODE
 Failover node: $FAILNODE
 ZPool name: $ZPOOL
@@ -94,7 +109,23 @@ Raid level: $RAIDLVL
 list of disk for the zpool: $VDEVS
 ost mount directory: $MOUNTDIR
 new ldev file: $LDEVCONF
-EOF
+"
+
+#reporting new configuration, then waits for user to approve
+echo $CONFIGUREREPORT
+
+read -p "Does that configuration look ok? y/n" ANSWER
+
+if [[ $ANSWER == "y" || $ANSWER == "Y" ]]
+then
+	echo "OK, formatting."
+else
+	echo "exiting."
+	exit
+fi
+
+#logfile initialization
+echo $CONFIGUREREPORT > $LOGFILE
 
 #create local directory structure
 if [ ! -d "$MOUNTDIR" ]
@@ -117,6 +148,6 @@ $NODENAME - $FSNAME-OST00$HEXINDEX zfs:$ZPOOLNAME
 EOF
 
 #build the file system
-mkfs.lustre --fsname=$FSNAME $REFORMAT --ost --backfstype=$BACKENDFS --index=$INDEX --mgsnode=$MGSNODE --failnode=$FAILNODE $ZPOOLNAME $RAIDLVL $VDEVS 1>> $LOGNAME 2>&1
+mkfs.lustre --fsname=$FSNAME $REFORMAT --ost --backfstype=$BACKENDFS --index=$INDEX --mgsnode=$MGSNODE --failnode=$FAILNODE $ZPOOLNAME $RAIDLVL $VDEVS 1>> $LOGFILE 2>&1
 
 
