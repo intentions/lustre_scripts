@@ -150,4 +150,7 @@ EOF
 #build the file system
 mkfs.lustre --fsname=$FSNAME $REFORMAT --ost --backfstype=$BACKENDFS --index=$INDEX --mgsnode=$MGSNODE --failnode=$FAILNODE $ZPOOLNAME $RAIDLVL $VDEVS 1>> $LOGFILE 2>&1
 
+#fix failover
+zfs set lustre:mgsnode=$MGSNODE:$FAILNODE $ZPOOLNAME 1>> $LOGFILE 2>&1
 
+echo "Ost creation complete. Verify that /tmp/new.ldev.conf is correct, then copy it to /etc/ldev.conf and mount the ost using /etc/init.d/lustre start (do this after all osts are created on the oss)"
