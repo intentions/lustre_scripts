@@ -79,6 +79,8 @@ VDEVS=${VDEV_LIST:-""}
 MGSNODE=${MGS_NODE:-""}
 FAILNODE=${FAILOVER_NODE:-""}
 
+INTERFACE=${SET_INTERFACE:-""}
+
 #backend file system
 BACKENDFS=${BACKEND_FILESYSTEM:-"zfs"}
 
@@ -93,6 +95,9 @@ LDEVCONF=${LDEV_CONF:-"/tmp/new.ldev.conf"}
 
 #lustre configuration file
 LUSTRECONF=${LUSTRE_CONFIG:-"/etc/sysconfig/lustre"}
+
+#lnet configuration file
+LNET_FILE=${LNET_CONFIG:-"/tmp/new.lnet.conf"}
 
 CONFIGREPORT="
 ost creation log
@@ -147,10 +152,19 @@ cat > $LDEVCONF <<EOF
 $NODENAME - $FSNAME-OST00$HEXINDEX zfs:$ZPOOLNAME
 EOF
 
+#create lnet.conf
+cat > $LNET_FILE <<EOF
+#lnet configurations
+options lnet networks=o2ib0($INTERFACE)
+EOF
+
 #build the file system
-mkfs.lustre --fsname=$FSNAME $REFORMAT --ost --backfstype=$BACKENDFS --index=$INDEX --mgsnode=$MGSNODE --failnode=$FAILNODE $ZPOOLNAME $RAIDLVL $VDEVS 1>> $LOGFILE 2>&1
+#mkfs.lustre --fsname=$FSNAME $REFORMAT --ost --backfstype=$BACKENDFS --index=$INDEX --mgsnode=$MGSNODE --failnode=$FAILNODE $ZPOOLNAME $RAIDLVL $VDEVS 1>> $LOGFILE 2>&1
 
 #fix failover
-zfs set lustre:mgsnode=$MGSNODE:$FAILNODE $ZPOOLNAME 1>> $LOGFILE 2>&1
+#zfs set lustre:mgsnode=$MGSNODE:$FAILNODE $ZPOOLNAME 1>> $LOGFILE 2>&1
 
-echo "Ost creation complete. Verify that /tmp/new.ldev.conf is correct, then copy it to /etc/ldev.conf and mount the ost using /etc/init.d/lustre start (do this after all osts are created on the oss)"
+echo "Ost creation complete.
+Verify that $LNET_FILE is correct, the place it in /etc/modprobe.d and start the lnet service
+Verify that /tmp/new.ldev.conf is correct, then copy it to /etc/ldev.conf 
+then mount the ost using /etc/init.d/lustre start (do this after all osts are created on the oss if there are more then one ost on the oss)"
