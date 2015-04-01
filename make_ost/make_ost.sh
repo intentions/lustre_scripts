@@ -100,7 +100,7 @@ LUSTRECONF=${LUSTRE_CONFIG:-"/etc/sysconfig/lustre"}
 LNET_FILE=${LNET_CONFIG:-"/tmp/new.lnet.conf"}
 
 #mount dir entry for /etc/sysconfig/lustre
-echo "entry for $LUSTRE_CONFIG"
+echo "entry for $LUSTRECONF"
 echo "LOCAL_MOUNT_DIR=$MOUNTDIR"
 
 #create lnet.conf
@@ -108,6 +108,7 @@ LNET_ENTRY="
 #lnet configurations
 options lnet networks=o2ib0($INTERFACE)
 "
+
 echo "new lnet.conf for /etc/modprobe.d"
 printf '%s\n' "$LNET_ENTRY"
 
@@ -158,27 +159,33 @@ echo $CONFIGUREREPORT > $LOGFILE
 #create local directory structure
 if [ ! -d "$MOUNTDIR" ]
 then
-	mkdir $MOUNTDIR
+#	mkdir $MOUNTDIR
 	echo "appending mount directory $MOUNTDIR to $LUSTRECONF"
-	echo "LOCAL_MOUNT_DIR=$MOUNTDIR" >> $LUSTRECONF
+#	echo "LOCAL_MOUNT_DIR=$MOUNTDIR" >> $LUSTRECONF
 else
 	echo "$MOUTDIR already exists, skipping directory creation and appending to $LUSTRECONF"
 fi
 
 echo "creating ldev file" >> $LOGFILE
-printf '%s\n' "$LDEVCONF_ENTRY" > $LDEV_CONF >> $LOGFILE
+printf '%s\n' "$LDEVCONF_ENTRY" | tee $LDEVCONF 
 
 echo "creating lnet file" >> $LOGFILE
-printf '%s\n' "$LNET_ENTRY" > $LNET_FILE >> $LOGFILE
+printf '%s\n' "$LNET_ENTRY" | tee $LNET_FILE 
 
 
 #build the file system
 #mkfs.lustre --fsname=$FSNAME $REFORMAT --ost --backfstype=$BACKENDFS --index=$INDEX --mgsnode=$MGSNODE --failnode=$FAILNODE $ZPOOLNAME $RAIDLVL $VDEVS 1>> $LOGFILE 2>&1
+BUILD_COMMAND="mkfs.lustre --fsname=$FSNAME $REFORMAT --ost --backfstype=$BACKENDFS --index=$INDEX --mgsnode=$MGSNODE --failnode=$FAILNODE $ZPOOLNAME $RAIDLVL $VDEVS"
+printf '%s\n' "$BUILD_COMMAND" >> $LOGFILE
+
+#
 
 #fix failover
 #zfs set lustre:mgsnode=$MGSNODE:$FAILNODE $ZPOOLNAME 1>> $LOGFILE 2>&1
 
-echo "Ost creation complete.
+FINAL_STATEMENT="Ost creation complete.
 Verify that $LNET_FILE is correct, the place it in /etc/modprobe.d and start the lnet service
 Verify that /tmp/new.ldev.conf is correct, then copy it to /etc/ldev.conf 
 then mount the ost using /etc/init.d/lustre start (do this after all osts are created on the oss if there are more then one ost on the oss)"
+
+printf '%s\n' "$FINAL_STATEMENT"
