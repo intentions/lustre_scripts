@@ -6,21 +6,21 @@
 #
 
 HELP="
- To create a new ost increment the index, update the zpool name, and ensure that the VDEVS list points to the data disks on the system
- the vdev aliases are found in /dev/disk/by-vdev, and it is built by the following
- create /etc/zfs/vdev_id.conf and populate it by looking at the /dev/disk/by-path/ directory.
- Create an alias for all disks, then comment out aliases that point to non-data disks
- after the alias file is fully populated use the command udevadmn trigger to populate the /dev/disk/by-vdev directory
- then verify that only data disks are listed by using fdisk -l /dev/disk/by-vdev/* (this assumes that the data disks are all the same size,
- and that that size differs from other disks on the sytem).
+ To create a new ost increment the index, update the zpool name, and ensure that the VDEVS list points to the data disks on the system 
+ the vdev aliases are found in /dev/disk/by-vdev, and it is built by the following 
+ create /etc/zfs/vdev_id.conf and populate it by looking at the /dev/disk/by-path/ directory. 
+ Create an alias for all disks, then comment out aliases that point to non-data disks 
+ after the alias file is fully populated use the command udevadmn trigger to populate the /dev/disk/by-vdev directory 
+ then verify that only data disks are listed by using fdisk -l /dev/disk/by-vdev/* (this assumes that the data disks are all the same size, 
+ and that that size differs from other disks on the sytem). 
  
- After that is done then this script can be run, generating the ldev.conf file used by luster as /tmp/new.ldev.conf
- assuming no errors are encountered then /tmp/new.ldev.conf can be moved to /etc/ldev.conf
- then lustre can be started using /etc/init.d/lustre start
+ After that is done then this script can be run, generating the ldev.conf file used by luster as /tmp/new.ldev.conf 
+ assuming no errors are encountered then /tmp/new.ldev.conf can be moved to /etc/ldev.conf 
+ then lustre can be started using /etc/init.d/lustre start 
 
- note that due to pathing issues the service command cannot be used to start lustre.
+ note that due to pathing issues the service command cannot be used to start lustre. 
 
- use syntax: $0 -c/--conf configfile
+ use syntax: $0 -c/--conf configfile 
 "
 
 #user check
@@ -30,8 +30,8 @@ then
 	exit
 fi
 
-if [[ $1 == "-h" || $1 =="--help" || ! $1 ]]; then
-	echo $HELP
+if [[ $1 == "-h" || $1 == "--help" || ! $1 ]]; then
+	printf '%s\n' "$HELP"	
 	exit
 fi
 
