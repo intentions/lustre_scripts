@@ -26,7 +26,7 @@ FAILOVER_NODE=""
 #BACKEND_FILESYSTEM="zfs"
 
 #RAID_LEVEL
-RAID_LEVEL="raidz2"
+#RAID_LEVEL="raidz2"
 
 #Lustre configuration used by /etc/init.d/lustre
 #LUSTRE_CONFIG="/etc/sysconfig/lustre"

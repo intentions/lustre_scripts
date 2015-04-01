@@ -85,7 +85,7 @@ INTERFACE=${SET_INTERFACE:-""}
 BACKENDFS=${BACKEND_FILESYSTEM:-"zfs"}
 
 #raid level
-RAIDLVL=${RAID_LEVEL:-""}
+RAIDLVL=${RAID_LEVEL:-"raidz2"}
 
 #node name
 NODENAME=`uname -n`
@@ -98,6 +98,29 @@ LUSTRECONF=${LUSTRE_CONFIG:-"/etc/sysconfig/lustre"}
 
 #lnet configuration file
 LNET_FILE=${LNET_CONFIG:-"/tmp/new.lnet.conf"}
+
+#mount dir entry for /etc/sysconfig/lustre
+echo "entry for $LUSTRE_CONFIG"
+echo "LOCAL_MOUNT_DIR=$MOUNTDIR"
+
+#create lnet.conf
+LNET_ENTRY="
+#lnet configurations
+options lnet networks=o2ib0($INTERFACE)
+"
+echo "new lnet.conf for /etc/modprobe.d"
+printf '%s\n' "$LNET_ENTRY"
+
+#create the entries in /etc/ldev.conf
+LDEVCONF_ENTRY="# example /etc/ldev.conf
+#
+#local  foreign/-  label       [md|zfs:]device-path   [journal-path]/- [raidtab]
+#
+# entries for $NODENAME
+$NODENAME - $FSNAME-OST00$HEXINDEX zfs:$ZPOOLNAME
+"
+echo "new ldev.conf"
+printf '%s\n' "$LDEVCONF_ENTRY"
 
 CONFIGREPORT="
 ost creation log
@@ -117,9 +140,9 @@ new ldev file: $LDEVCONF
 "
 
 #reporting new configuration, then waits for user to approve
-echo $CONFIGUREREPORT
+printf '%s\n' "$CONFIGREPORT"	
 
-read -p "Does that configuration look ok? y/n" ANSWER
+read -p "Does that configuration look ok? [y/n] " ANSWER
 
 if [[ $ANSWER == "y" || $ANSWER == "Y" ]]
 then
@@ -142,21 +165,12 @@ else
 	echo "$MOUTDIR already exists, skipping directory creation and appending to $LUSTRECONF"
 fi
 
-#create the entries in /etc/ldev.conf
-cat > $LDEVCONF <<EOF
-# example /etc/ldev.conf
-#
-#local  foreign/-  label       [md|zfs:]device-path   [journal-path]/- [raidtab]
-#
-# entries for $NODENAME
-$NODENAME - $FSNAME-OST00$HEXINDEX zfs:$ZPOOLNAME
-EOF
+echo "creating ldev file" >> $LOGFILE
+printf '%s\n' "$LDEVCONF_ENTRY" > $LDEV_CONF >> $LOGFILE
 
-#create lnet.conf
-cat > $LNET_FILE <<EOF
-#lnet configurations
-options lnet networks=o2ib0($INTERFACE)
-EOF
+echo "creating lnet file" >> $LOGFILE
+printf '%s\n' "$LNET_ENTRY" > $LNET_FILE >> $LOGFILE
+
 
 #build the file system
 #mkfs.lustre --fsname=$FSNAME $REFORMAT --ost --backfstype=$BACKENDFS --index=$INDEX --mgsnode=$MGSNODE --failnode=$FAILNODE $ZPOOLNAME $RAIDLVL $VDEVS 1>> $LOGFILE 2>&1
