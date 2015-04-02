@@ -22,6 +22,9 @@ MGS_NODE=""
 #Failover mgs node: the failover mgs node ip
 FAILOVER_NODE=""
 
+#mount point
+#MOUNT_POINT="/ost"
+
 #backend file system
 #BACKEND_FILESYSTEM="zfs"
 

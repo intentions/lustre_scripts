@@ -68,7 +68,7 @@ fi
 
 #pool name, based on index
 ZPOOLNAME="lustre-ost$INDEX/ost$INDEX"
-MOUNTDIR=${MOUNT_DIRECTORY:-"/ost$INDEX"}
+MOUNTDIR=${MOUNT_POINT:-"/ost"}
 
 #list of disk aliases from /etc/zfs/vdev_id.conf
 #VDEVS="disk2 disk3 disk4 disk5 disk6 disk7 disk8 disk9 disk10 disk11 disk12 disk13 disk14 disk15 disk16 disk17 disk18 disk19 disk20 disk21 disk22 disk23 disk24 disk25 disk26 disk27 disk28 disk29 disk30 disk31"
@@ -159,9 +159,9 @@ echo $CONFIGUREREPORT > $LOGFILE
 #create local directory structure
 if [ ! -d "$MOUNTDIR" ]
 then
-#	mkdir $MOUNTDIR
+	mkdir $MOUNTDIR
 	echo "appending mount directory $MOUNTDIR to $LUSTRECONF"
-#	echo "LOCAL_MOUNT_DIR=$MOUNTDIR" >> $LUSTRECONF
+	echo "LOCAL_MOUNT_DIR=$MOUNTDIR" >> $LUSTRECONF
 else
 	echo "$MOUTDIR already exists, skipping directory creation and appending to $LUSTRECONF"
 fi
@@ -185,7 +185,8 @@ printf '%s\n' "$BUILD_COMMAND" >> $LOGFILE
 
 FINAL_STATEMENT="Ost creation complete.
 Verify that $LNET_FILE is correct, the place it in /etc/modprobe.d and start the lnet service
-Verify that /tmp/new.ldev.conf is correct, then copy it to /etc/ldev.conf 
+Verify that /tmp/new.ldev.conf is correct, then copy it to /etc/ldev.conf.  If other OSTs have already been created then take the ost entry
+from new.ldev.conf and append it to the current /etc/ldev.conf.
 then mount the ost using /etc/init.d/lustre start (do this after all osts are created on the oss if there are more then one ost on the oss)"
 
 printf '%s\n' "$FINAL_STATEMENT"
