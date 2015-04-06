@@ -61,6 +61,10 @@ cd $BACKUPMOUNT
 #create sparse tar
 /bin/tar czf $BACKUPPATH/$BACKUPTAR --sparse . 2>
 
+cd /tmp
+
+/bin/umount $BACKUPMOUNT
+
 #now remove the snapshot, commented out for testing
 #/sbin/lvremove $SNAPSHOTDISK
 
