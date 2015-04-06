@@ -1,5 +1,8 @@
 #configuration file for use by the snapshot backup process.
 
+#debug mode flag
+#DEBUG_MODE="1"
+
 #notificaiton email
 #NOTIFY_EMAIL=""
 

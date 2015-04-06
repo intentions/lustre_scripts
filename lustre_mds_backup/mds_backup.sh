@@ -12,6 +12,7 @@
 # completed.
 # logging should also be used to keep track of backups
 
+
 if [[ $1 == "-c" || $1 == "--conf" ]]
 then
 	if [ -f $2 ]
@@ -23,7 +24,9 @@ else
 	ERROR="no configuration file given, please use -c <config file> or --config <config file"
 fi
 
-#START TIME
+#sets debug mode
+[ -n ${DEBUG_MODE:-""} ] && set -x
+
 
 #timestamp for backups
 TIMESTAMP=`date +%d%^b%y`
@@ -42,30 +45,57 @@ EAFILE=${EA_FILE:-""}-$TIMESTAMP.bak
 SNAPSIZE=${SNAPSHOT_SIZE:-""}
 
 #create logical volume snapshot
-/sbin/lvcreate --size $SNAPSIZE --shapshot $SNAPSHOTNAME $TARGET 2> $ERR_CATCH
+/sbin/lvcreate --size $SNAPSIZE --shapshot $SNAPSHOTNAME $TARGET 
 
-if [ $ERR_CATCH ]
-
+if [ "$?" -ne 0 ]
+then
+	ERROR_MESSAGE="error encountered while creating lv snapshot\n"
+	ERROR_MESSAGE= "$ERROR_MESSAGE $?"
+	echo "$ERROR_MESSAGE" | /usr/bin/mutt -s "mds backup error on $HOSTNAME" $EMAIL
+	exit
+fi
 
 #sleep for 60s to allow the multi-mount protection to age out
 sleep 60
 
 #mount snapshot as ldisk
 
-/bin/mount -t ldiskfs $SNAPSHOTDISK $BACKUPMOUNT
+/bin/mount -t ldiskfs $SNAPSHOTDISK $BACKUPMOUNT 
+if ["$?" -ne 0 ] 
+then
+	ERROR_MESSAGE="error encountered while mounting mds snapshot\n"
+	ERROR_MESSAGE= "$ERROR_MESSAGE $?"
+	echo "$ERROR_MESSAGE" | /usr/bin/mutt -s "mds bnackup error on $HOSTNAME" $EMAIL
+	exit
+fi
+
+#Start of backup
+STARTTIME=$(date +%s)
 
 cd $BACKUPMOUNT
+if ["$?" -ne 0 ]
+then
+	
 
 /usr/bin/getfattr -R -d -m '.*' -P . > $BACKUPPATH/$EA_FILE
 
 #create sparse tar
-/bin/tar czf $BACKUPPATH/$BACKUPTAR --sparse . 2>
+/bin/tar czf $BACKUPPATH/$BACKUPTAR --sparse . 2> 
 
+#get out of the backup directory 
 cd /tmp
 
 /bin/umount $BACKUPMOUNT
 
 #now remove the snapshot, commented out for testing
 #/sbin/lvremove $SNAPSHOTDISK
+
+#time back ends
+ENDTIME=$(date +%s)
+
+#calculate the run time
+RUNTIME=$[$ENDTIME - $STARTTIME]
+
+
 
 
