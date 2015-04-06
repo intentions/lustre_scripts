@@ -99,10 +99,6 @@ LUSTRECONF=${LUSTRE_CONFIG:-"/etc/sysconfig/lustre"}
 #lnet configuration file
 LNET_FILE=${LNET_CONFIG:-"/tmp/new.lnet.conf"}
 
-#mount dir entry for /etc/sysconfig/lustre
-echo "entry for $LUSTRECONF"
-echo "LOCAL_MOUNT_DIR=$MOUNTDIR"
-
 #create lnet.conf
 LNET_ENTRY="
 #lnet configurations
@@ -113,15 +109,14 @@ echo "new lnet.conf for /etc/modprobe.d"
 printf '%s\n' "$LNET_ENTRY"
 
 #create the entries in /etc/ldev.conf
-LDEVCONF_ENTRY="# example /etc/ldev.conf
+LDEVCONF_HEADER="# example /etc/ldev.conf
 #
 #local  foreign/-  label       [md|zfs:]device-path   [journal-path]/- [raidtab]
 #
 # entries for $NODENAME
-$NODENAME - $FSNAME-OST00$HEXINDEX zfs:$ZPOOLNAME
 "
-echo "new ldev.conf"
-printf '%s\n' "$LDEVCONF_ENTRY"
+
+LDEVCONF_ENTRY="$NODENAME - $FSNAME-OST00$HEXINDEX zfs:$ZPOOLNAME"
 
 CONFIGREPORT="
 ost creation log
@@ -137,7 +132,7 @@ ZPool name: $ZPOOL
 Raid level: $RAIDLVL
 list of disk for the zpool: $VDEVS
 ost mount directory: $MOUNTDIR
-new ldev file: $LDEVCONF
+new ldev entry: $LDEVCONF_ENTRY
 "
 
 #reporting new configuration, then waits for user to approve
@@ -167,7 +162,13 @@ else
 fi
 
 echo "creating ldev file" >> $LOGFILE
-printf '%s\n' "$LDEVCONF_ENTRY" | tee $LDEVCONF 
+
+if [ ! -f $LDEVCONF ]
+then
+	printf '%s\n' $LDEV_HEADER | tee $LDEVCONF
+fi
+
+printf '%s\n' "$LDEVCONF_ENTRY" | tee --append $LDEVCONF 
 
 echo "creating lnet file" >> $LOGFILE
 printf '%s\n' "$LNET_ENTRY" | tee $LNET_FILE 
@@ -176,17 +177,22 @@ printf '%s\n' "$LNET_ENTRY" | tee $LNET_FILE
 #build the file system
 #mkfs.lustre --fsname=$FSNAME $REFORMAT --ost --backfstype=$BACKENDFS --index=$INDEX --mgsnode=$MGSNODE --failnode=$FAILNODE $ZPOOLNAME $RAIDLVL $VDEVS 1>> $LOGFILE 2>&1
 BUILD_COMMAND="mkfs.lustre --fsname=$FSNAME $REFORMAT --ost --backfstype=$BACKENDFS --index=$INDEX --mgsnode=$MGSNODE --failnode=$FAILNODE $ZPOOLNAME $RAIDLVL $VDEVS"
-printf '%s\n' "$BUILD_COMMAND" >> $LOGFILE
+printf '%s\n' "$BUILD_COMMAND"
 
-#
+$BUILD_COMMAND
 
 #fix failover
-#zfs set lustre:mgsnode=$MGSNODE:$FAILNODE $ZPOOLNAME 1>> $LOGFILE 2>&1
+FAILOVER_SETUP="zfs set lustre:mgsnode=$MGSNODE:$FAILNODE $ZPOOLNAME"
+printf '%s\n' "$FAILOVER_SETUP"
+
+$FAILOVER_SETUP 
 
 FINAL_STATEMENT="Ost creation complete.
 Verify that $LNET_FILE is correct, the place it in /etc/modprobe.d and start the lnet service
-Verify that /tmp/new.ldev.conf is correct, then copy it to /etc/ldev.conf.  If other OSTs have already been created then take the ost entry
-from new.ldev.conf and append it to the current /etc/ldev.conf.
-then mount the ost using /etc/init.d/lustre start (do this after all osts are created on the oss if there are more then one ost on the oss)"
+Verify that /tmp/new.ldev.conf is correct, then copy it to /etc/ldev.conf then mount the ost 
+using /etc/init.d/lustre start
+
+If other osts are on the system the lustre start script will only mount the new ones.
+"
 
 printf '%s\n' "$FINAL_STATEMENT"
