@@ -1,0 +1,29 @@
+#configuration file for use by the snapshot backup process.
+
+#notificaiton email
+#NOTIFY_EMAIL=""
+
+#lustre mount point
+#MDS_DISK="/dev/lustrepool/lustrevol"
+
+#logical volume for backup
+#LVBAK="/dev/lustrepool/testbackup"
+
+#snapshot name
+#SNAPSHOT_NAME="mdtbackup"
+
+#Snapshot size
+#SNAPSHOT_SIZE="500GB"
+
+#mount point for snapshot
+#SNAPSHOT_MOUNT="/mnt/mdtbackup"
+
+#path to store backup
+#BACKUP_PATH="/tmp"
+
+#backup name
+#BACKUP_NAME="MDTBACKUP-" #DDMONYY.tgz
+
+#Extended attribute file name
+#EA_FILE="ea-" #DDMONYY.tgz
+

@@ -22,3 +22,46 @@ then
 else
 	ERROR="no configuration file given, please use -c <config file> or --config <config file"
 fi
+
+#START TIME
+
+#timestamp for backups
+TIMESTAMP=`date +%d%^b%y`
+
+EMAIL=${NOTIFY_EMAIL:-""}
+
+ERR_CATCH=""
+
+#file name for the tar
+BACKUPTAR=${BACKUP_NAME:-""}-$TIMESTAMP.tgz
+
+#file name for the ea file
+EAFILE=${EA_FILE:-""}-$TIMESTAMP.bak
+
+#Size of the snapshot
+SNAPSIZE=${SNAPSHOT_SIZE:-""}
+
+#create logical volume snapshot
+/sbin/lvcreate --size $SNAPSIZE --shapshot $SNAPSHOTNAME $TARGET 2> $ERR_CATCH
+
+if [ $ERR_CATCH ]
+
+
+#sleep for 60s to allow the multi-mount protection to age out
+sleep 60
+
+#mount snapshot as ldisk
+
+/bin/mount -t ldiskfs $SNAPSHOTDISK $BACKUPMOUNT
+
+cd $BACKUPMOUNT
+
+/usr/bin/getfattr -R -d -m '.*' -P . > $BACKUPPATH/$EA_FILE
+
+#create sparse tar
+/bin/tar czf $BACKUPPATH/$BACKUPTAR --sparse . 2>
+
+#now remove the snapshot, commented out for testing
+#/sbin/lvremove $SNAPSHOTDISK
+
+
