@@ -1,0 +1,23 @@
+#config file for the mgs/mdt building script
+
+#name of the lustre file system
+#FILE_SYSTEM_NAME=""
+
+#reformat flag
+#REFORMAT="--reformat"
+
+#interface as defined by lnet
+#INTERFACE="@o2ib"
+
+"ib ip for mgs / mdt heads
+MGSNODE1=""
+MGSNODE2=""
+
+#Build with mgs
+MGS="--mgs"
+
+#build with mdt
+MDT="--mdt"
+
+#target disk
+LUSTRE_DISK=""
