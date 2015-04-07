@@ -1,5 +1,8 @@
 #config file for the mgs/mdt building script
 
+#DEBUG flag
+#DEBUG="1"
+
 #name of the lustre file system
 #FILE_SYSTEM_NAME=""
 

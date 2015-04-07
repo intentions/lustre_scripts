@@ -1,6 +1,9 @@
 #this is the configuration template used by make_ost.sh
 #note that this script assumes that you are using zfs as the back end file system
 
+#debug flag
+#DEBUG="1"
+
 #File system name: the name of the lustre file system the ost is to be part of
 FILESYSTEM_NAME=""
 
