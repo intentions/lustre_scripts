@@ -1,0 +1,10 @@
+#
+#vdev alias list for zfs
+#
+#mirrored system hgst4t_
+#alias system /dev/disk/by-id/
+#mirrored disk_, not used
+#alias mirror /dev/disk/by-id/
+alias hgst4t_1 /dev/disk/by-id/
+alias hgst4t_2 /dev/disk/by-id/
+
