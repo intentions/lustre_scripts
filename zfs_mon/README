@@ -1,0 +1,3 @@
+zfs monitor script for luster
+this scritp uses the information in /etc/ldev.conf to look for lustre zpools
+then report if a given zpool is degraded
