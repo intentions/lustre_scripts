@@ -1,9 +1,0 @@
-#
-# Configuraiton file for the lustre zfs monitoring script
-#
-
-#LDEV_CONF="/etc/ldev.conf"
-EMAIL_ADDRESS=""
-NOTIFY_SUBJECT="WARNING: degraded zpool on $HOSTNAME"
-#EMAIL_CLIENT="/usr/bin/mutt"
-
