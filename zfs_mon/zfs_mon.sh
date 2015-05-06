@@ -7,10 +7,9 @@ HELP="
  This script uses zpool list and zpool status to identify mounted pools, then report on their status
 "
 
-LDEV_FILE=${LDEV_CONF:-"/etc/ldev.conf"}
-EMAIL=${EMAIL_ADDRESS:-"strosahl@jlab.org"}
-SUBJECT=${NOTIFY_SUBJECT:-"WARNING: degraded zpool on $HOSTNAME"}
-EMAIL_CMD=${EMAIL_CLIENT:-"/usr/bin/mutt"}
+LDEV_FILE="/etc/ldev.conf"
+EMAIL="strosahl@jlab.org"
+EMAIL_CMD="/usr/bin/mutt"
 
 send_email ()
 {
