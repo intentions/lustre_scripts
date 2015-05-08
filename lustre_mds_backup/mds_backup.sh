@@ -12,6 +12,12 @@
 # completed.
 # logging should also be used to keep track of backups
 
+send_email ()
+{
+/usr/bin/mutt -s "mds backup error on $HOSTNAME" $EMAIL<< EOF
+"$1"
+EOF
+}
 
 if [[ $1 == "-c" || $1 == "--conf" ]]
 then
@@ -51,7 +57,7 @@ if [ "$?" -ne 0 ]
 then
 	ERROR_MESSAGE="error encountered while creating lv snapshot\n"
 	ERROR_MESSAGE= "$ERROR_MESSAGE $?"
-	echo "$ERROR_MESSAGE" | /usr/bin/mutt -s "mds backup error on $HOSTNAME" $EMAIL
+	send_email $ERROR_MESSAGE
 	exit
 fi
 
@@ -60,11 +66,11 @@ sleep 60
 
 #mount snapshot as ldisk
 
-/bin/mount -t ldiskfs $SNAPSHOTDISK $BACKUPMOUNT 
+/bin/mount -t ldiskfs $SNAPSHOTDISK $BACKUPMOUNT 2> ERROR
 if ["$?" -ne 0 ] 
 then
 	ERROR_MESSAGE="error encountered while mounting mds snapshot\n"
-	ERROR_MESSAGE= "$ERROR_MESSAGE $?"
+	ERROR_MESSAGE= "$ERROR_MESSAGE $ERROR"
 	echo "$ERROR_MESSAGE" | /usr/bin/mutt -s "mds bnackup error on $HOSTNAME" $EMAIL
 	exit
 fi
@@ -73,14 +79,15 @@ fi
 STARTTIME=$(date +%s)
 
 cd $BACKUPMOUNT
-if ["$?" -ne 0 ]
-then
-	
 
-/usr/bin/getfattr -R -d -m '.*' -P . > $BACKUPPATH/$EA_FILE
+OUTPUT_CATCH=`/usr/bin/getfattr -R -d -m '.*' -P . > $BACKUPPATH/$EA_FILE`
+EA_INFO = `ls -lsrt $BACKUPPATH/$EA_FILE`
 
 #create sparse tar
-/bin/tar czf $BACKUPPATH/$BACKUPTAR --sparse . 2> 
+/bin/tar czf $BACKUPPATH/$BACKUPTAR --sparse .
+BACKUP_INFO=`ls -lsrt $BACKUPPATH/$BACKUPTAR`
+
+
 
 #get out of the backup directory 
 cd /tmp
@@ -96,6 +103,7 @@ ENDTIME=$(date +%s)
 #calculate the run time
 RUNTIME=$[$ENDTIME - $STARTTIME]
 
-
+/usr/bin/mutt -s "mds backup created successfuly on $HOSTNAME" $EMAIL <<EOF
+backup took $RUNTIME
 
 
