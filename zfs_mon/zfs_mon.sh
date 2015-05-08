@@ -4,10 +4,11 @@
 # uses /etc/ldev.conf to locate zpools, then zpool status to find degraded pools.
 
 HELP="
- This script uses zpool list and zpool status to identify mounted pools, then report on their status
+ This script uses /etc/ldev.conf and zpool status to identify mounted pools, then sends an email if 
+ a pool returns a status other then ONLINE
 "
 
-LDEV_FILE="/etc/ldev.conf"
+LDEV_FILE="/etc/ldev.conf" 
 EMAIL="strosahl@jlab.org"
 EMAIL_CMD="/usr/bin/mutt"
 
