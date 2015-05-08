@@ -31,15 +31,18 @@ do
 	then
 		POOL_NAME=`echo $POOL | cut -f2 -d":" | cut -f1 -d"/"`
 		POOL_STATUS=`/sbin/zpool status $POOL_NAME`
-		if [ $? ]
+
+		#check for errors running zpool
+		if [ ! $? ]
 		then
 			send_email "$POOL_STATUS"	
 		fi
-		
+
+		#get pool state		
 		POOL_STATE=`echo "$POOL_STATUS" | grep state`
 		if [[ $POOL_STATE != *ONLINE* ]]
 		then
-		send_email "$POOL_STATUS"
+			send_email "$POOL_STATUS"
 		fi
 	fi
 
