@@ -71,7 +71,7 @@ if ["$?" -ne 0 ]
 then
 	ERROR_MESSAGE="error encountered while mounting mds snapshot\n"
 	ERROR_MESSAGE= "$ERROR_MESSAGE $ERROR"
-	echo "$ERROR_MESSAGE" | /usr/bin/mutt -s "mds bnackup error on $HOSTNAME" $EMAIL
+	echo "$ERROR_MESSAGE" | /usr/bin/mutt -s "mds backup error on $HOSTNAME" $EMAIL
 	exit
 fi
 
@@ -80,19 +80,45 @@ STARTTIME=$(date +%s)
 
 cd $BACKUPMOUNT
 
-OUTPUT_CATCH=`/usr/bin/getfattr -R -d -m '.*' -P . > $BACKUPPATH/$EA_FILE`
-EA_INFO = `ls -lsrt $BACKUPPATH/$EA_FILE`
+/usr/bin/getfattr -R -d -m '.*' -P . > $BACKUPPATH/$EA_FILE
+EA_INFO = `ls -lsrt $BACKUPPATH/$EA_FILE 2>&1`
+
+if [ "$?" -ne -0 ]
+then
+	ERROR_MESSAGE="Error checking $EA_FILE: $EA_INFO"
+	echo "$ERROR_MESSAGE" | /usr/bin/mutt -s "mds backup error on $HOSTNAME" $EMAIL
+	exit
+fi
 
 #create sparse tar
-/bin/tar czf $BACKUPPATH/$BACKUPTAR --sparse .
-BACKUP_INFO=`ls -lsrt $BACKUPPATH/$BACKUPTAR`
+TAR_MDS=`/bin/tar czf $BACKUPPATH/$BACKUPTAR --sparse . 2>&1`
+if [ "$?" -ne 0 ]
+then
+	ERROR_MESSAGE="Error creating backup tar of mds: $TAR_MDS"
+	echo "$ERROR_MESSAGE" | /usr/bin/mutt -s "mds backup error on $HOSTNAME" $EMAIL
+	exit
+fi
 
+BACKUP_INFO=`ls -lsrt $BACKUPPATH/$BACKUPTAR 2>&1`
+if [ "$?" -ne 0 ]
+then
+	ERROR_MESSAGE="Error checking backup tar of mds: $BACKUP_INFO"
+	echo "$ERROR_MESSAGE" | /usr/bin/mutt -s "mds backup error on $HOSTNAME" $EMAIL
+	exit
+fi
 
 
 #get out of the backup directory 
 cd /tmp
 
-/bin/umount $BACKUPMOUNT
+
+UNMOUNT_INFO=`/bin/umount $BACKUPMOUNT 2>&1`
+if [ "$?" -ne 0 ]
+then
+	ERROR_MESSAGE="Error unmounting mds backup directory: $UNMOUNT_INFO"
+	echo "$ERROR_MESSAGE" | /usr/bin/mutt -s "mds backup error on $HOSTNAME" $EMAIL
+        exit
+fi
 
 #now remove the snapshot, commented out for testing
 #/sbin/lvremove $SNAPSHOTDISK
@@ -105,5 +131,11 @@ RUNTIME=$[$ENDTIME - $STARTTIME]
 
 /usr/bin/mutt -s "mds backup created successfuly on $HOSTNAME" $EMAIL <<EOF
 backup took $RUNTIME
+backup ea file $BACKUPPATH/$EA_FILE:
+$EA_INFO
+backup mds tar file $BACKUPPATH/$BACKUPTAR:
+$BACKUP_INFO
+EOF
 
+exit 0
 
