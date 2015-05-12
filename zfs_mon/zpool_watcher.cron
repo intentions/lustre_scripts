@@ -1,0 +1,5 @@
+#zpool monitoring crontab for scoss systems
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+HOME=/tmp
+50 06 * * * root /usr/local/zfs_monitor/zfs_mon.sh 2>&1 /dev/null; exit 0
