@@ -9,7 +9,7 @@ HELP="
 "
 
 LDEV_FILE="/etc/ldev.conf" 
-EMAIL="strosahl@jlab.org"
+EMAIL="scicomp@jlab.org"
 EMAIL_CMD="/usr/bin/mutt"
 
 send_email ()
