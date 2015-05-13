@@ -1,32 +1,33 @@
+#!/bin/bash
 #configuration file for use by the snapshot backup process.
 
-#debug mode flag
+#debug mode, comment out to disable
 #DEBUG_MODE="1"
 
 #notificaiton email
-#NOTIFY_EMAIL=""
+NOTIFY_EMAIL=""
 
 #lustre mount point
-#MDS_DISK="/dev/lustrepool/lustrevol"
-
-#logical volume for backup
-#LVBAK="/dev/lustrepool/testbackup"
+MDS_DISK="/dev/lustrepool/lustrevol"
 
 #snapshot name
-#SNAPSHOT_NAME="mdtbackup"
+SNAPSHOT_NAME="mdtbackup"
+
+#logical volume for backup
+LVBAK="/dev/lustrepool/$SNAPSHOT_NAME"
 
 #Snapshot size
-#SNAPSHOT_SIZE="500GB"
+SNAPSHOT_SIZE="500GB"
 
 #mount point for snapshot
-#SNAPSHOT_MOUNT="/mnt/mdtbackup"
+SNAPSHOT_MOUNT="/mnt/mdtbackup"
 
-#path to store backup
-#BACKUP_PATH="/tmp"
+#path to store backup files
+BACKUP_PATH="/tmp"
 
 #backup name
-#BACKUP_NAME="MDTBACKUP-" #DDMONYY.tgz
+BACKUP_NAME="MDTBACKUP-" #DDMONYY.tgz
 
 #Extended attribute file name
-#EA_FILE="ea-" #DDMONYY.tgz
+EA_FILE="ea-" #DDMONYY.tgz
 
