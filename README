@@ -1,5 +1,10 @@
 Lustre bash scripts
 
-mds backup script:  script to run via cron to provide lustre backups, uses lvm snapshots
+mds backup script:  script to run via cron to provide lustre backups, uses lvm snapshots (work in progress)
 
-make_ost: creates an ost on an oss
+make_ost: creates an ost on an oss, using zfs as the backend
+
+make_mdt: creates the mdt (work in progress)
+
+zfs_mon: uses the /etc/ldev.conf file and the zpool status command to check the status on
+	osts wtih a zfs back end.
