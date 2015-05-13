@@ -30,9 +30,6 @@ else
 	ERROR="no configuration file given, please use -c <config file> or --config <config file"
 fi
 
-#sets debug mode
-[ -n ${DEBUG_MODE:-""} ] && set -x
-
 
 #timestamp for backups
 TIMESTAMP=`date +%d%^b%y`
@@ -50,8 +47,30 @@ EAFILE=${EA_FILE:-""}-$TIMESTAMP.bak
 #Size of the snapshot
 SNAPSIZE=${SNAPSHOT_SIZE:-""}
 
+#name of snapshot
+SNAPSHOTNAME=${SNAPSHOT_NAME:-""}
+
+#mds directory
+TARGET_MDS=${MDS_DISK:-""}
+
+#snapshot mount directory
+SNAPSHOTDISK=${LVBAK:-""}
+
+#mount point for backup directory
+BACKUPMOUNT=${SNAPSHOT_MOUNT:-""}
+
+#path to where the backups go
+BACKUPPATH=${BACKUP_PATH:-""}
+
+echo "email $EMAIL"
+echo "backup tar $BACKUPTAR"
+echo "ea file name $EAFILE"
+echo "target mds $TARGET_MDS"
+
+sleep 120
+
 #create logical volume snapshot
-/sbin/lvcreate --size $SNAPSIZE --shapshot $SNAPSHOTNAME $TARGET 
+/sbin/lvcreate --size $SNAPSIZE --shapshot $SNAPSHOTNAME $TARGET_MDS 
 
 if [ "$?" -ne 0 ]
 then
@@ -66,7 +85,7 @@ sleep 60
 
 #mount snapshot as ldisk
 
-/bin/mount -t ldiskfs $SNAPSHOTDISK $BACKUPMOUNT 2> ERROR
+ERROR=`/bin/mount -t ldiskfs $SNAPSHOTDISK $BACKUPMOUNT 2>&1`
 if ["$?" -ne 0 ] 
 then
 	ERROR_MESSAGE="error encountered while mounting mds snapshot\n"
@@ -76,6 +95,7 @@ then
 fi
 
 #Start of backup
+
 STARTTIME=$(date +%s)
 
 cd $BACKUPMOUNT
