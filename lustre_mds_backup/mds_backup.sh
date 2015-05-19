@@ -163,7 +163,7 @@ ENDTIME=$(date +%s)
 RUNTIME=$[$ENDTIME - $STARTTIME]
 
 /usr/bin/mutt -s "mds backup created successfuly on $HOSTNAME" $EMAIL <<EOF
-backup took $RUNTIME
+backup took $RUNTIME seconds
 backup ea file $BACKUPPATH/$EA_FILE:
 $EA_INFO
 backup mds tar file $BACKUPPATH/$BACKUPTAR:
