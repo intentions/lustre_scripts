@@ -26,6 +26,7 @@ then
 	. $2
 	else
 	ERROR="given configuraiton file $2 does not exist"
+	fi
 else
 	ERROR="no configuration file given, please use -c <config file> or --config <config file"
 fi
@@ -66,11 +67,12 @@ echo "email $EMAIL"
 echo "backup tar $BACKUPTAR"
 echo "ea file name $EAFILE"
 echo "target mds $TARGET_MDS"
-
-sleep 120
+echo "snapshot name $SNAPSHOTNAME"
 
 #create logical volume snapshot
-/sbin/lvcreate --size $SNAPSIZE --shapshot $SNAPSHOTNAME $TARGET_MDS 
+echo "creating lv backup"
+
+/sbin/lvcreate --size $SNAPSIZE --snapshot --name $SNAPSHOTNAME $TARGET_MDS 
 
 if [ "$?" -ne 0 ]
 then
@@ -81,9 +83,12 @@ then
 fi
 
 #sleep for 60s to allow the multi-mount protection to age out
+echo "sleeping for a minute to allow multi-mount protection to expire"
 sleep 60
 
 #mount snapshot as ldisk
+
+echo "mounting $SNAPSHOTDISK $BACKUPMOUNT"
 
 ERROR=`/bin/mount -t ldiskfs $SNAPSHOTDISK $BACKUPMOUNT 2>&1`
 if ["$?" -ne 0 ] 
@@ -98,10 +103,14 @@ fi
 
 STARTTIME=$(date +%s)
 
+echo "starting backup at $STARTTIME"
+
 cd $BACKUPMOUNT
 
-/usr/bin/getfattr -R -d -m '.*' -P . > $BACKUPPATH/$EA_FILE
-EA_INFO = `ls -lsrt $BACKUPPATH/$EA_FILE 2>&1`
+/usr/bin/getfattr -R -d -m '.*' -P . > $BACKUPPATH/$EAFILE
+EA_INFO=`ls -lsrt $BACKUPPATH/$EA_FILE 2>&1`
+
+echo "created ea file $BACKUPPATH/$EA_FILE"
 
 if [ "$?" -ne -0 ]
 then
@@ -127,6 +136,7 @@ then
 	exit
 fi
 
+echo "backup tar $BACKUPPATH/$BACKUPTAR created"
 
 #get out of the backup directory 
 cd /tmp
@@ -140,7 +150,10 @@ then
         exit
 fi
 
+echo "snapshot unmounted"
+
 #now remove the snapshot, commented out for testing
+echo "now the snapshot $SNAPSHOTDISK can be removed with lvremove"
 #/sbin/lvremove $SNAPSHOTDISK
 
 #time back ends
